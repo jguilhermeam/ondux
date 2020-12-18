@@ -45,7 +45,7 @@ class ResultsEvaluation:
                         reference_block.text.split())
 
             for result_block in result_record:
-                if result_block.tag is not 'none' and result_block.tag not in results_stats:
+                if result_block.tag not in results_stats:
                     results_stats[result_block.tag] = len(
                         result_block.text.split())
                 else:
@@ -109,7 +109,7 @@ class ResultsEvaluation:
                         reference_block.text.split())
 
             for result_block in result_record:
-                if result_block.tag is not 'none' and result_block.tag not in results_stats:
+                if result_block.tag not in results_stats:
                     results_stats[result_block.tag] = len(
                         result_block.text.split())
                 else:
@@ -144,9 +144,10 @@ class ResultsEvaluation:
                 record.precision += attr_evaluation[attr].precision
                 record.recall += attr_evaluation[attr].recall
                 record.f_measure += attr_evaluation[attr].f_measure
-            record.precision /= len(attr_evaluation)
-            record.recall /= len(attr_evaluation)
-            record.f_measure /= len(attr_evaluation)
+            if len(attr_evaluation) > 0:
+                record.precision /= len(attr_evaluation)
+                record.recall /= len(attr_evaluation)
+                record.f_measure /= len(attr_evaluation)
             record_evaluation.append(record)
 
         precision = 0

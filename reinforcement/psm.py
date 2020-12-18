@@ -1,14 +1,12 @@
 class PSM:
 
     def __init__(self, records, attribute_list):
-        print("Calculating PSM matrices...")
-        attribute_list.extend(['none','begin','end'])
+        attribute_list.append('begin')
         self.f_matrix = self.init_f_matrix(records, attribute_list)
 
-        attribute_list.remove('end')
         attribute_list.remove('begin')
         self.p_matrix = self.init_p_matrix(records, attribute_list)
-        attribute_list.remove('none')
+
 
     def init_f_matrix(self, records, attribute_list):
         transitions = {}
@@ -20,28 +18,23 @@ class PSM:
                 matrix[i][j] = 0
 
         for blocks in records:
-            #begin
-            i = 'begin'
-            j = blocks[0].label
-            matrix[i][j] += 1
-            transitions[i] += 1
-            #middle
-            last = len(blocks)-1
-            for aux in range(0,last):
+            for aux in range(len(blocks)):
                 i = blocks[aux].label
-                j = blocks[aux+1].label
-                matrix[i][j] += 1
-                transitions[i] += 1
-            #ending
-            i = blocks[last].label
-            j = 'end'
-            matrix[i][j] += 1
-            transitions[i] += 1
+                if aux == 0:
+                    j = 'begin'
+                else:
+                    j = blocks[aux-1].label
+
+                if i != 'none' and j != 'none':
+                    matrix[j][i] += 1
+                    transitions[j] += 1
 
         for i in attribute_list:
             for j in attribute_list:
                 if transitions[i] > 0:
                     matrix[i][j] /= transitions[i]
+                else:
+                    matrix[i][j] = 0
 
         return matrix
 
@@ -55,10 +48,11 @@ class PSM:
             matrix[attr] = [0 for i in range(max_positions)]
 
         for blocks in records:
-            for i in range(0,len(blocks)):
-                attr = blocks[i].label
-                matrix[attr][i] += 1
-                total_in_pos[i] += 1
+            for k in range(len(blocks)):
+                attr = blocks[k].label
+                if attr != 'none':
+                    matrix[attr][k] += 1
+                    total_in_pos[k] += 1
 
         for attr in attribute_list:
             for i in range(max_positions):

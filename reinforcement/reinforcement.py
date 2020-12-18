@@ -12,12 +12,13 @@ def classify(j,blocks,attribute_list,psm):
         i_attr = 'begin'
     else:
         i_attr = blocks[j-1].label
-
+    teste = blocks[j].label
     attribute_score = {}
     for attr in attribute_list:
-        fw = psm.f_matrix[i_attr][attr]
         if i_attr == 'none':
             fw = 0
+        else:
+            fw = psm.f_matrix[i_attr][attr]
         attribute_score[attr] = 1 - ((1-blocks[j].matching_score[attr])*(1-fw)*(1-psm.p_matrix[attr][j]))
     blocks[j].reinforcement_score = attribute_score
     blocks[j].label = blocks[j].get_top_reinforcement_score()
