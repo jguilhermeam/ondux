@@ -1,61 +1,23 @@
-import logging
-from pprint import pprint
-from utils import functions as F
-import operator
+from reinforcement.psm import PSM
 
-logger = logging.getLogger(__name__)
-
-
-def reinforce(matching_list, psm, attribute_list):
-    '''Revise the pre-labeling made by the Matching step over the blocks.
-    Unmatched blocks are labeled and mismatched blocks are expected to be
-    correctly re-labeled.'''
-    attribute_index = init_attrbute_index(attribute_list)
-
-    for record in matching_list:
-        i = 0
-        while i < len(record):
-            attribute_score = init_attribute_score(attribute_list)
-            current_block = record[i]
-            if current_block.label is not 'none':
-                for attr in attribute_list:
-                    t_score = psm.t_matrix[attribute_index[current_block.label]
-                                           ][attribute_index[attr]]
-                    p_score = psm.p_matrix[attribute_index[attr]][i+1]
-                    attribute_score[attr] = (
-                        1 - ((1 - current_block.matching_score[attr])*(1 - t_score)*(1 - p_score)))
-                # current_block.reinforcement_score = attribute_score
-                # current_block.label = current_block.get_top_reinforcement_score()
-            else:
-                if i > 0:
-                    previous_block = record[i-1]
-                    for attr in attribute_list:
-                        t_score = psm.t_matrix[attribute_index[previous_block.label]
-                                               ][attribute_index[attr]]
-                        p_score = psm.p_matrix[attribute_index[attr]][i+1]
-                        attribute_score[attr] = (
-                            1 - ((1 - previous_block.matching_score[attr])*(1 - t_score)*(1 - p_score)))
-                    current_block.reinforcement_score = attribute_score
-                    current_block.label = current_block.get_top_reinforcement_score()
-                else:
-                    for attr in attribute_list:
-                        p_score = psm.p_matrix[attribute_index[attr]][1]
-                        attribute_score[attr] = (
-                            1 - ((1 - current_block.matching_score[attr])*(1 - p_score)))
-                    current_block.reinforcement_score = attribute_score
-                    current_block.label = current_block.get_top_reinforcement_score()
-            i += 1
+def reinforce(records, attribute_list):
+    psm = PSM(records, attribute_list)
+    for blocks in records:
+        for i in range(len(blocks)):
+            classify(i,blocks,attribute_list,psm)
 
 
-def init_attribute_score(attribute_list):
+def classify(j,blocks,attribute_list,psm):
+    if j == 0:
+        i_attr = 'begin'
+    else:
+        i_attr = blocks[j-1].label
+
     attribute_score = {}
     for attr in attribute_list:
-        attribute_score[attr] = 0
-    return attribute_score
-
-
-def init_attrbute_index(attribute_list):
-    attribute_index = {}
-    for i, attr in enumerate(attribute_list):
-        attribute_index[attr] = i + 1
-    return attribute_index
+        fw = psm.f_matrix[i_attr][attr]
+        if i_attr == 'none':
+            fw = 0
+        attribute_score[attr] = 1 - ((1-blocks[j].matching_score[attr])*(1-fw)*(1-psm.p_matrix[attr][j]))
+    blocks[j].reinforcement_score = attribute_score
+    blocks[j].label = blocks[j].get_top_reinforcement_score()

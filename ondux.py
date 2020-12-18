@@ -33,8 +33,8 @@ def run_matching(blocks_list, k_base):
 def run_reinforcement(matching_list, k_base):
     '''Reinforce Matching outcome taking into consideration
     structure-based features'''
-    psm = PSM(matching_list, k_base)
-    reinforce(matching_list, psm, k_base.get_attributes())
+    #psm = PSM(matching_list, k_base)
+    reinforce(matching_list, k_base.get_attributes())
 
 
 def run_evaluation(reference_file, results_file, attributes):
