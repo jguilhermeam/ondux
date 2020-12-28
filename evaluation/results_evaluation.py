@@ -16,8 +16,8 @@ class ResultsEvaluation:
         '''Read reference and result files and then calculate evaluation metrics'''
         ResultsEvaluation.attribute_evaluation(
             reference_file, results_file, attributes)
-        ResultsEvaluation.record_evaluation(
-            reference_file, results_file, attributes)
+        #ResultsEvaluation.record_evaluation(
+        #    reference_file, results_file, attributes)
 
     @staticmethod
     def attribute_evaluation(reference_file, results_file, attributes):
@@ -79,10 +79,24 @@ class ResultsEvaluation:
             '----------------------------------------------------------------------------')
         print('{:<15} {:<20} {:<20} {:<18}'.format(
             'Attribute', 'Precision', 'Recall', 'F-Measure'))
+        total_metrics = Metrics()
+        total_attributes = 0
         for k, v in attr_evaluation.items():
             if v.f_measure > 0:
                 print('{:<15} {:<20} {:<20} {:<18}'.format(
                     k, v.precision, v.recall, v.f_measure))
+                total_metrics.precision += v.precision
+                total_metrics.recall += v.recall
+                total_metrics.f_measure += v.f_measure
+                total_attributes += 1
+
+        total_metrics.precision /= total_attributes
+        total_metrics.recall /= total_attributes
+        total_metrics.f_measure /= total_attributes
+        print()
+        print('{:<15} {:<20} {:<20} {:<18}'.format(
+            "TOTAL", total_metrics.precision, total_metrics.recall, total_metrics.f_measure))
+        print()
 
     @staticmethod
     def record_evaluation(reference_file, results_file, attributes):
