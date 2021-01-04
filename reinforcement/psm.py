@@ -25,7 +25,7 @@ class PSM:
                 else:
                     j = blocks[aux-1].label
 
-                if i != 'none' and j != 'none':
+                if i != 'none' and j != 'none' and i != j:
                     matrix[j][i] += 1
                     transitions[j] += 1
 
@@ -33,8 +33,6 @@ class PSM:
             for j in attribute_list:
                 if transitions[i] > 0:
                     matrix[i][j] /= transitions[i]
-                else:
-                    matrix[i][j] = 0
 
         return matrix
 
